@@ -1,0 +1,21 @@
+.build/
+.swiftpm/
+__pycache__/
+*.pyc
+References/upstream/local/
+References/private/
+
+# gm defaults
+.DS_Store
+.index-build/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+.env
+.env.*
+.env/*
+compiled.pkl
+/compiled.pkl
+**/compiled.pkl

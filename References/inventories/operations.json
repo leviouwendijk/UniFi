@@ -1,0 +1,440 @@
+[
+    {
+        "fingerprint": "51d33aa6dd70f37c9d922f9e4c6cb49f54e9e8e630999feddc094818fea1aa64",
+        "method": "GET",
+        "operation_id": "getCountries",
+        "path": "/v1/countries"
+    },
+    {
+        "fingerprint": "dde50cb8f632612725ab1ce2a122e4278a27359775460587c66ab42a9cf4f46e",
+        "method": "GET",
+        "operation_id": "getDpiApplications",
+        "path": "/v1/dpi/applications"
+    },
+    {
+        "fingerprint": "b21b726d03fc0e5990d9eb2bab5d29934a2188598b554f9c20f5e53e19bbea47",
+        "method": "GET",
+        "operation_id": "getDpiApplicationCategories",
+        "path": "/v1/dpi/categories"
+    },
+    {
+        "fingerprint": "c14140e494e66643fe973dc383cfb3a951241cfd305a8f45c4c198e11fa1d677",
+        "method": "GET",
+        "operation_id": "getInfo",
+        "path": "/v1/info"
+    },
+    {
+        "fingerprint": "71d25e866076b152e5b128b1f2165fbca976a0b07d840a035194a969f3cfbfde",
+        "method": "GET",
+        "operation_id": "getPendingDevicePage",
+        "path": "/v1/pending-devices"
+    },
+    {
+        "fingerprint": "83d141a5c528bd5908973b1b6be5f8c0080a71f2ac8f61a8e54a3577b98a2ecd",
+        "method": "GET",
+        "operation_id": "getSiteOverviewPage",
+        "path": "/v1/sites"
+    },
+    {
+        "fingerprint": "aef80393fe404145a43d168a88cf0758554c27cd1482bfa84e98d54458287ca3",
+        "method": "GET",
+        "operation_id": "getAclRulePage",
+        "path": "/v1/sites/{siteId}/acl-rules"
+    },
+    {
+        "fingerprint": "2dd5e5ba5228b6da2bcec8b86285341f03796dc83e99bcf4b42823d2579d4715",
+        "method": "POST",
+        "operation_id": "createAclRule",
+        "path": "/v1/sites/{siteId}/acl-rules"
+    },
+    {
+        "fingerprint": "2da229ef775e7e703a69a6aa1a3b8445d5547fe438ed0e0f203992955fbb6fc7",
+        "method": "GET",
+        "operation_id": "getAclRuleOrdering",
+        "path": "/v1/sites/{siteId}/acl-rules/ordering"
+    },
+    {
+        "fingerprint": "561c01d298d43fc95c20e0931aa5d73898797004fea05ea6a29d6e8eeed1769c",
+        "method": "PUT",
+        "operation_id": "updateAclRuleOrdering",
+        "path": "/v1/sites/{siteId}/acl-rules/ordering"
+    },
+    {
+        "fingerprint": "7503cd2edf33cc249864301784bfc7d7e21dd52f72c773b0f95986a0cb2ccc20",
+        "method": "DELETE",
+        "operation_id": "deleteAclRule",
+        "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+        "fingerprint": "d0c76cd546c7df7619c01f4172e914b3da8e1cad00340539fbbf3c3c68b4b000",
+        "method": "GET",
+        "operation_id": "getAclRule",
+        "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+        "fingerprint": "650625d2ed11351662b772158eed77ac15dd5e843d9f143563f3dcf3d62be745",
+        "method": "PUT",
+        "operation_id": "updateAclRule",
+        "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+        "fingerprint": "b79b27c880e68ba12ca65f6d07772977e4e8ae5e308027a66ddc91192261559b",
+        "method": "GET",
+        "operation_id": "getConnectedClientOverviewPage",
+        "path": "/v1/sites/{siteId}/clients"
+    },
+    {
+        "fingerprint": "03167f446aa121ad330bff3e57c4b35d89ab77023e4904a3157b9f8a9129c636",
+        "method": "GET",
+        "operation_id": "getConnectedClientDetails",
+        "path": "/v1/sites/{siteId}/clients/{clientId}"
+    },
+    {
+        "fingerprint": "98f40f462d882126424dfeeb8a7c3612314d22b800470fb0dc4543f95b3c42ff",
+        "method": "POST",
+        "operation_id": "executeConnectedClientAction",
+        "path": "/v1/sites/{siteId}/clients/{clientId}/actions"
+    },
+    {
+        "fingerprint": "692e0dfee29bdf9f8620679cb1869b5f74864ed46b2ccdfa47f37fbcf90f31b2",
+        "method": "GET",
+        "operation_id": "getDeviceTagPage",
+        "path": "/v1/sites/{siteId}/device-tags"
+    },
+    {
+        "fingerprint": "561bd06ad08361a43061d6525e9ec256c25dfa8e3ab7ab91ffecca771ecccfc2",
+        "method": "GET",
+        "operation_id": "getAdoptedDeviceOverviewPage",
+        "path": "/v1/sites/{siteId}/devices"
+    },
+    {
+        "fingerprint": "c2211143c88dce57e435d7d11923e87e012aec8cfc0a37953a06183702134e16",
+        "method": "POST",
+        "operation_id": "adoptDevice",
+        "path": "/v1/sites/{siteId}/devices"
+    },
+    {
+        "fingerprint": "596b3d999e26888b5547906d0ee55784d6f039d32cea52bd5c01b336e1c53a0d",
+        "method": "DELETE",
+        "operation_id": "removeDevice",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}"
+    },
+    {
+        "fingerprint": "2d97afae7a9d15c0f6d475ec6c4392fba184720dccbeb4af5e2b1b8256a1848d",
+        "method": "GET",
+        "operation_id": "getAdoptedDeviceDetails",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}"
+    },
+    {
+        "fingerprint": "150976a1d8d8a945387bff852797099828e29655b8e6a18fcb5981ac2caff28e",
+        "method": "POST",
+        "operation_id": "executeAdoptedDeviceAction",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/actions"
+    },
+    {
+        "fingerprint": "115cff5c8285f3acb1df93f5981c1f3ae8a8bdb9d7e478d3218b22c4a8770358",
+        "method": "POST",
+        "operation_id": "executePortAction",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/interfaces/ports/{portIdx}/actions"
+    },
+    {
+        "fingerprint": "0b4c9b9a67f3e5dde862bc667378f612542eeb4574c0f4f11729b9279f9a1594",
+        "method": "GET",
+        "operation_id": "getAdoptedDeviceLatestStatistics",
+        "path": "/v1/sites/{siteId}/devices/{deviceId}/statistics/latest"
+    },
+    {
+        "fingerprint": "7ae63dce7fe213fd21d45363dbb7ce448b65bb86947064893bf058495f1f8512",
+        "method": "GET",
+        "operation_id": "getDnsPolicyPage",
+        "path": "/v1/sites/{siteId}/dns/policies"
+    },
+    {
+        "fingerprint": "f66cff453e419cd19a345a44e5d8fce56a1820abaf5c42cea865c742d337da42",
+        "method": "POST",
+        "operation_id": "createDnsPolicy",
+        "path": "/v1/sites/{siteId}/dns/policies"
+    },
+    {
+        "fingerprint": "21b7b5e66df8c5331f6553b3f499af2e13cd5924c96dc413dbe9973c85939e66",
+        "method": "DELETE",
+        "operation_id": "deleteDnsPolicy",
+        "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+        "fingerprint": "c451661fb5298eeb392e26ecb5a0d33ff95226b5c90e9d81d78f6c9c12309d09",
+        "method": "GET",
+        "operation_id": "getDnsPolicy",
+        "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+        "fingerprint": "ecc54a5b1b9bde3fd99cfde02891d413efaf4a6f05c7e0b50282cbc28ecc8775",
+        "method": "PUT",
+        "operation_id": "updateDnsPolicy",
+        "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+        "fingerprint": "e859c225cd1b846f21ac381ed9902e694db38abf74ed56043c3e3d9d0138057f",
+        "method": "GET",
+        "operation_id": "getFirewallPolicies",
+        "path": "/v1/sites/{siteId}/firewall/policies"
+    },
+    {
+        "fingerprint": "6da4530ce2d5b66418d0f7c5991797a30584ae805b3a72bcc1df716cd668710b",
+        "method": "POST",
+        "operation_id": "createFirewallPolicy",
+        "path": "/v1/sites/{siteId}/firewall/policies"
+    },
+    {
+        "fingerprint": "db7730702981e3578969f856d657c05d72342807d72d01046007765bd8c791bf",
+        "method": "GET",
+        "operation_id": "getFirewallPolicyOrdering",
+        "path": "/v1/sites/{siteId}/firewall/policies/ordering"
+    },
+    {
+        "fingerprint": "dc9125d09f9f9fceae3bd6c67236b38ae69a4ed971166d9f9050389f3ab061bb",
+        "method": "PUT",
+        "operation_id": "updateFirewallPolicyOrdering",
+        "path": "/v1/sites/{siteId}/firewall/policies/ordering"
+    },
+    {
+        "fingerprint": "e27eb19952037990fe263fd363c6702d8d8450a474b2f31a5ae77d3f5877d577",
+        "method": "DELETE",
+        "operation_id": "deleteFirewallPolicy",
+        "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+        "fingerprint": "57b51295bdd72cb9e3ecab75dca4ef5c4d31362bbdaabefe6393bdc04a743852",
+        "method": "GET",
+        "operation_id": "getFirewallPolicy",
+        "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+        "fingerprint": "b4d3b8fcc3f147b3d088ff58c5b1dc40715797ac177b10dce03e3297d1b83c9e",
+        "method": "PATCH",
+        "operation_id": "patchFirewallPolicy",
+        "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+        "fingerprint": "e88f790e3e613fa2184a505b00f153906869c21a074c41893848d9b78f235e90",
+        "method": "PUT",
+        "operation_id": "updateFirewallPolicy",
+        "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+        "fingerprint": "87c83dda26525d4edda760002fc6c70cd97066e00a4ef284268d6f5f949dfcda",
+        "method": "GET",
+        "operation_id": "getFirewallZones",
+        "path": "/v1/sites/{siteId}/firewall/zones"
+    },
+    {
+        "fingerprint": "3adf0286082680cd299ab9faef48c5f305b09a1c17db9a4be75cdc4a7e09ee95",
+        "method": "POST",
+        "operation_id": "createFirewallZone",
+        "path": "/v1/sites/{siteId}/firewall/zones"
+    },
+    {
+        "fingerprint": "aa7d718e5acd2036cb9acedbcd9416535dccba6574d044cd2f8ff0d9ce1685c8",
+        "method": "DELETE",
+        "operation_id": "deleteFirewallZone",
+        "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+        "fingerprint": "41b371023f9a4118dc7a75ee65acb19dfc3e1058c8f702f628763f315f0d7a5b",
+        "method": "GET",
+        "operation_id": "getFirewallZone",
+        "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+        "fingerprint": "cfc5662b634a6e834e54af01b7cd1ade866ee2ba76728d9315a6af8362406377",
+        "method": "PUT",
+        "operation_id": "updateFirewallZone",
+        "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+        "fingerprint": "8b15fb4098f9d30e444628b42ed3c6f7303f98562e97c784685e47aa4044ce5d",
+        "method": "DELETE",
+        "operation_id": "deleteVouchers",
+        "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+        "fingerprint": "b1bd4b2e3af2c7860243ad33d8c6c3407d1af07ad5fb02d80663598e1f01336a",
+        "method": "GET",
+        "operation_id": "getVouchers",
+        "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+        "fingerprint": "e185b47e48ca8971d0b958437e2dba64b85c01a37425c96ca721e7d4a50e7d7e",
+        "method": "POST",
+        "operation_id": "createVouchers",
+        "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+        "fingerprint": "011317e2ceb4f059161e7be27e4686a5397412a0da38a20c50aa3657c7ab08ab",
+        "method": "DELETE",
+        "operation_id": "deleteVoucher",
+        "path": "/v1/sites/{siteId}/hotspot/vouchers/{voucherId}"
+    },
+    {
+        "fingerprint": "5fb5cfbb6dd010770424082758ba276f644a11676f93b9060db0ba66a89bda89",
+        "method": "GET",
+        "operation_id": "getVoucher",
+        "path": "/v1/sites/{siteId}/hotspot/vouchers/{voucherId}"
+    },
+    {
+        "fingerprint": "61886211b919ac64765fffda7c6c153456ec33fa429d4728cefadf82fb92b971",
+        "method": "GET",
+        "operation_id": "getNetworksOverviewPage",
+        "path": "/v1/sites/{siteId}/networks"
+    },
+    {
+        "fingerprint": "59eff35dea22f71904f115fb233144b0a179d0915886a3f4f7cc780381abd9c5",
+        "method": "POST",
+        "operation_id": "createNetwork",
+        "path": "/v1/sites/{siteId}/networks"
+    },
+    {
+        "fingerprint": "91bbdab49bb1b4a4d02605fc6c132941ceaf22101f9d6e0eebf812995c4400ca",
+        "method": "DELETE",
+        "operation_id": "deleteNetwork",
+        "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+        "fingerprint": "671c7d99121675c35c079967c76b0f77e541a1562116e63bc0258f2463ef6407",
+        "method": "GET",
+        "operation_id": "getNetworkDetails",
+        "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+        "fingerprint": "15e7c81caed38fc7e0b78f5a73f2f95fd44983cbaac734d130f2bf547657bc65",
+        "method": "PUT",
+        "operation_id": "updateNetwork",
+        "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+        "fingerprint": "874c547c818676d6b52da4f767ec863e85de1f256d3b76c3716c0945b033f421",
+        "method": "GET",
+        "operation_id": "getNetworkReferences",
+        "path": "/v1/sites/{siteId}/networks/{networkId}/references"
+    },
+    {
+        "fingerprint": "915d38e292ba20a32420b2116990d183380cc1070a540426b96a9e0aaef1eff6",
+        "method": "GET",
+        "operation_id": "getRadiusProfileOverviewPage",
+        "path": "/v1/sites/{siteId}/radius/profiles"
+    },
+    {
+        "fingerprint": "e62c06d3307a566c85f090f1a3487e1012cf8f9e6a20f1e3d95f7d8b54a12f35",
+        "method": "GET",
+        "operation_id": "getLagPage",
+        "path": "/v1/sites/{siteId}/switching/lags"
+    },
+    {
+        "fingerprint": "4c625d013ed225d73753090d0802ea4e0c1c7f39730df5f37f8396ec5c782bee",
+        "method": "GET",
+        "operation_id": "getLag",
+        "path": "/v1/sites/{siteId}/switching/lags/{lagId}"
+    },
+    {
+        "fingerprint": "477831c7a8367c829ff22e5525a84970d3857218293d7047764a9bbf76001257",
+        "method": "GET",
+        "operation_id": "getMcLagDomainPage",
+        "path": "/v1/sites/{siteId}/switching/mc-lag-domains"
+    },
+    {
+        "fingerprint": "e11699b3b7bf20e8cbc77c694cafeca7a62031eff24923ff5ad54a1c0c6a4f37",
+        "method": "GET",
+        "operation_id": "getMcLagDomain",
+        "path": "/v1/sites/{siteId}/switching/mc-lag-domains/{mcLagDomainId}"
+    },
+    {
+        "fingerprint": "164227953fc59b270497c6a29fc36e1767004edd7c66a916a2e07102d9f5bee5",
+        "method": "GET",
+        "operation_id": "getSwitchStackPage",
+        "path": "/v1/sites/{siteId}/switching/switch-stacks"
+    },
+    {
+        "fingerprint": "ba4e1d7ffe7086dc27a3a327b89856940e5e9a998dcc1580cc38a853820164b1",
+        "method": "GET",
+        "operation_id": "getSwitchStack",
+        "path": "/v1/sites/{siteId}/switching/switch-stacks/{switchStackId}"
+    },
+    {
+        "fingerprint": "350dd05e2c0ad83ab00ac3feca69bc6f5383937ca290534e011451450bbf484f",
+        "method": "GET",
+        "operation_id": "getTrafficMatchingLists",
+        "path": "/v1/sites/{siteId}/traffic-matching-lists"
+    },
+    {
+        "fingerprint": "16eb3bb267cd162b646ad10eeab388b55d7d2f0b103623893850c28c56e20e85",
+        "method": "POST",
+        "operation_id": "createTrafficMatchingList",
+        "path": "/v1/sites/{siteId}/traffic-matching-lists"
+    },
+    {
+        "fingerprint": "18ca42df5d53e67bd61a3753f44fe85cf46c1eda8da7198c1c9a4c9478dee207",
+        "method": "DELETE",
+        "operation_id": "deleteTrafficMatchingList",
+        "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+        "fingerprint": "646816704f78c2c8475fae4c3e77f2dc787f04ab3decc9b280c31470dc0194f7",
+        "method": "GET",
+        "operation_id": "getTrafficMatchingList",
+        "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+        "fingerprint": "84ff2ab402469ac64db899aef6f76aa6e7f2ca347d66c17d1b4a9ac7ddfc61c9",
+        "method": "PUT",
+        "operation_id": "updateTrafficMatchingList",
+        "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+        "fingerprint": "b98834f2a9bcc1b5818a53eb9d7eeaf96e128ada14cb53e0a77ddbf3a65cefe7",
+        "method": "GET",
+        "operation_id": "getVpnServerPage",
+        "path": "/v1/sites/{siteId}/vpn/servers"
+    },
+    {
+        "fingerprint": "9aa0de76a106e42091a4c0544e795e8281a823c3e548a62bc68a578a3d627e66",
+        "method": "GET",
+        "operation_id": "getSiteToSiteVpnTunnelPage",
+        "path": "/v1/sites/{siteId}/vpn/site-to-site-tunnels"
+    },
+    {
+        "fingerprint": "78fd491a690ff161ffab53b46b3fa2a37a0fbdb95c56a11e40590e7a62e20da1",
+        "method": "GET",
+        "operation_id": "getWansOverviewPage",
+        "path": "/v1/sites/{siteId}/wans"
+    },
+    {
+        "fingerprint": "3968888aa46e45799b59f0fd2b15854c9dfbad8933e30f14194cbc6281a9cf60",
+        "method": "GET",
+        "operation_id": "getWifiBroadcastPage",
+        "path": "/v1/sites/{siteId}/wifi/broadcasts"
+    },
+    {
+        "fingerprint": "37418c828d81d7bcff0f9824720c584d93fa295b7b806c9f8fa6c2d292178c2a",
+        "method": "POST",
+        "operation_id": "createWifiBroadcast",
+        "path": "/v1/sites/{siteId}/wifi/broadcasts"
+    },
+    {
+        "fingerprint": "6630227a3782a8ff684b1e0feac669f8f31b12dda91a471b41606b154f051888",
+        "method": "DELETE",
+        "operation_id": "deleteWifiBroadcast",
+        "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    },
+    {
+        "fingerprint": "86a15e1e4a0bd2491f07f928cebfc426aab9d8ef458464ab7d48ae6b075c1072",
+        "method": "GET",
+        "operation_id": "getWifiBroadcastDetails",
+        "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    },
+    {
+        "fingerprint": "7147ac999f1f9d92cc605a31b26f912ae74be95ae9d1fcc7b59f7cc638f59372",
+        "method": "PUT",
+        "operation_id": "updateWifiBroadcast",
+        "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    }
+]
