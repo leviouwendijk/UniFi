@@ -74,14 +74,20 @@ struct PlanningTests {
         try check(partial.zones[0].network_ids.contains(unresolvedNetwork))
         try check(partial.policies[0].destination_zone_id == unresolvedZone)
         try check(try partial.topology().nodes.count == 6)
+        let telemetryOnPartial = try UniFiPlanning.Plan.prepare(
+            from: partial,
+            changes: [.patch_policy_telemetry(
+                policy_id: policyID,
+                logging_enabled: true,
+                report_flow_enabled: nil
+            )]
+        )
+        try check(!telemetryOnPartial.before.reference_complete)
+        try check(telemetryOnPartial.after.policies[0].logging_enabled)
         do {
             _ = try UniFiPlanning.Plan.prepare(
                 from: partial,
-                changes: [.patch_policy_telemetry(
-                    policy_id: policyID,
-                    logging_enabled: true,
-                    report_flow_enabled: nil
-                )]
+                changes: [.set_zone_networks(zone_id: trusted, network_ids: [a])]
             )
             throw PlanningTestFailure.assertion
         } catch UniFiPlanning.Failure.incomplete_snapshot {}

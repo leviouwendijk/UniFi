@@ -118,10 +118,12 @@ extension UniFi {
 
         public func patchTelemetry(
             _ id: UUID,
-            to proposed: Firewall.Policy.TelemetryPatch
+            to proposed: Firewall.Policy.TelemetryPatch,
+            verifyBefore: @Sendable (Firewall.Policy) throws -> Void = { _ in }
         ) async throws -> Firewall.Policy {
             let path = "\(base)/\(id.uuidString.lowercased())"
             let before: Firewall.Policy = try await backend.get(path)
+            try verifyBefore(before)
             do {
                 try await approver.approve(.patchPolicyTelemetry(siteID: siteID, before: before, proposed: proposed))
             } catch {

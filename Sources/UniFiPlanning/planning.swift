@@ -1,5 +1,67 @@
+import UniFi
 import Difference
 import Foundation
+
+extension UniFiPlanning {
+    /// A host-injected controller capability. This constructor must never be
+    /// driven by model input; approval is supplied by the trusted host.
+    public struct TelemetryWriter: Sendable {
+        private let client: UniFi.Client
+        private let approver: any UniFi.MutationApprover
+
+        public init(client: UniFi.Client, approvedBy approver: any UniFi.MutationApprover) {
+            self.client = client
+            self.approver = approver
+        }
+
+        /// Only an existing USER_DEFINED policy's two telemetry flags may differ.
+        /// GET-before, PATCH, GET-after are not atomic; ambiguous results fail closed.
+        public func apply(
+            site_id: UUID,
+            before: UniFiPlanning.Policy,
+            after: UniFiPlanning.Policy
+        ) async throws -> UniFiPlanning.Policy {
+            guard before.id == after.id,
+                  before.origin == "USER_DEFINED", after.origin == "USER_DEFINED",
+                  before != after else {
+                throw UniFiPlanning.Failure.invalid_change
+            }
+            var permitted = before
+            permitted.logging_enabled = after.logging_enabled
+            permitted.report_flow_enabled = after.report_flow_enabled
+            guard permitted == after,
+                  before.report_flow_enabled == after.report_flow_enabled || after.report_flow_enabled != nil else {
+                throw UniFiPlanning.Failure.invalid_change
+            }
+            let logging: Bool? = before.logging_enabled == after.logging_enabled
+                ? nil : after.logging_enabled
+            let reporting: Bool? = before.report_flow_enabled == after.report_flow_enabled
+                ? nil : after.report_flow_enabled
+            let patch = try UniFi.Firewall.Policy.TelemetryPatch(
+                loggingEnabled: logging,
+                reportFlowEnabled: reporting
+            )
+            let site = client.network.site(site_id)
+            _ = try await client.mutations(approvedBy: approver)
+                .site(site_id).firewall.policies.patchTelemetry(
+                    before.id,
+                    to: patch,
+                    verifyBefore: { current in
+                        guard current.metadata.origin == "USER_DEFINED",
+                              UniFiPlanning.Policy(current) == before else {
+                            throw UniFiPlanning.Failure.stale_snapshot
+                        }
+                    }
+                )
+            // Always GET independently; the PATCH response is not verification.
+            let observed = UniFiPlanning.Policy(try await site.firewall.policies.get(before.id))
+            guard observed == after else {
+                throw UniFiPlanning.Failure.verification_failed
+            }
+            return observed
+        }
+    }
+}
 
 extension UniFiPlanning {
     public enum Change: Sendable, Codable, Hashable {
@@ -30,7 +92,12 @@ extension UniFiPlanning {
             changes: [Change]
         ) throws -> Self {
             guard !changes.isEmpty else { throw Failure.no_changes }
-            guard snapshot.reference_complete else {
+            // An unresolved unrelated VLAN does not prohibit a telemetry-only edit.
+            // Zone-membership edits still require a complete inventory.
+            guard snapshot.reference_complete || changes.allSatisfy({ change in
+                if case .patch_policy_telemetry = change { return true }
+                return false
+            }) else {
                 throw Failure.incomplete_snapshot
             }
             var zones = snapshot.zones

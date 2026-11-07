@@ -4,6 +4,7 @@ import FoundationNetworking
 #endif
 import Milieu
 import UniFi
+import UniFiPlanning
 
 private enum MutationTestFailure: Error {
     case assertion
@@ -127,6 +128,62 @@ struct MutationTests {
         try check(body?["loggingEnabled"] as? Bool == true)
         try check(body?["reportFlowEnabled"] == nil)
         try check(body?["action"] == nil)
+
+        let parsedBefore = try JSONDecoder().decode(UniFi.Firewall.Policy.self, from: Data(policy.utf8))
+        let parsedAfter = try JSONDecoder().decode(UniFi.Firewall.Policy.self, from: Data(afterPolicy.utf8))
+        let beforeState = UniFiPlanning.Policy(parsedBefore)
+        let afterState = UniFiPlanning.Policy(parsedAfter)
+        let writerTransport = ReplyTransport([
+            response(200, policy), response(200, afterPolicy), response(200, afterPolicy)
+        ])
+        let writerApprover = CheckApprover(allowed: true)
+        let writerClient = try UniFi.Client(
+            gateway: gateway, credentials: TestCredentials(), transport: writerTransport
+        )
+        let writer = UniFiPlanning.TelemetryWriter(client: writerClient, approvedBy: writerApprover)
+        let verified = try await writer.apply(site_id: siteID, before: beforeState, after: afterState)
+        try check(verified == afterState)
+        try check((await writerTransport.requests()).map(\.httpMethod) == ["GET", "PATCH", "GET"])
+        try check((await writerApprover.recorded()).count == 1)
+
+        let staleTransport = ReplyTransport([response(200, afterPolicy)])
+        let staleClient = try UniFi.Client(
+            gateway: gateway, credentials: TestCredentials(), transport: staleTransport
+        )
+        let staleWriter = UniFiPlanning.TelemetryWriter(client: staleClient, approvedBy: writerApprover)
+        do {
+            _ = try await staleWriter.apply(site_id: siteID, before: beforeState, after: afterState)
+            throw MutationTestFailure.assertion
+        } catch UniFiPlanning.Failure.stale_snapshot {}
+        try check((await staleTransport.requests()).count == 1)
+
+        let deniedTransport = ReplyTransport([response(200, policy)])
+        let deniedClient = try UniFi.Client(
+            gateway: gateway, credentials: TestCredentials(), transport: deniedTransport
+        )
+        let deniedWriter = UniFiPlanning.TelemetryWriter(
+            client: deniedClient, approvedBy: CheckApprover(allowed: false)
+        )
+        do {
+            _ = try await deniedWriter.apply(site_id: siteID, before: beforeState, after: afterState)
+            throw MutationTestFailure.assertion
+        } catch UniFi.Failure.mutationNotApproved {}
+        try check((await deniedTransport.requests()).count == 1)
+
+        let wrongPost = ReplyTransport([
+            response(200, policy), response(200, afterPolicy), response(200, policy)
+        ])
+        let verifyClient = try UniFi.Client(
+            gateway: gateway, credentials: TestCredentials(), transport: wrongPost
+        )
+        let verifyWriter = UniFiPlanning.TelemetryWriter(
+            client: verifyClient, approvedBy: writerApprover
+        )
+        do {
+            _ = try await verifyWriter.apply(site_id: siteID, before: beforeState, after: afterState)
+            throw MutationTestFailure.assertion
+        } catch UniFiPlanning.Failure.verification_failed {}
+        try check((await wrongPost.requests()).count == 3)
 
         do {
             _ = try UniFi.Firewall.Policy.TelemetryPatch()
