@@ -3,6 +3,7 @@ import Foundation
 import FoundationNetworking
 #endif
 import Milieu
+import Errors
 import UniFi
 import UniFiPlanning
 
@@ -113,11 +114,105 @@ struct PlanningCaptureTests {
         do {
             _ = try await UniFiPlanning.Reader(client: driftClient).list_sites()
             throw PlanningCaptureFailure.assertion
-        } catch UniFiPlanning.Failure.incomplete_page {}
+        } catch let failure as UniFiPlanning.ReadFailure {
+            guard failure.stage == .sites, failure.kind == .pagination else {
+                throw PlanningCaptureFailure.assertion
+            }
+        }
         do {
             _ = try await UniFiPlanning.Reader(client: driftClient).capture(site_id: site)
             throw PlanningCaptureFailure.assertion
-        } catch UniFiPlanning.Failure.incomplete_page {}
-        print("PASS UniFiPlanning paginated site discovery, snapshot capture and drift rejection")
+        } catch let failure as UniFiPlanning.ReadFailure {
+            guard failure.stage == .networks, failure.kind == .pagination else {
+                throw PlanningCaptureFailure.assertion
+            }
+        }
+        try await verifyLivePolicyShape(gateway: gateway, site: site)
+        print("PASS UniFiPlanning paginated site discovery, 345-policy capture, safe decoding and page-drift rejection")
     }
 }
+
+private extension PlanningCaptureTests {
+    static func verifyLivePolicyShape(gateway: URL, site: UUID) async throws {
+        let transport = LivePolicyCaptureTransport(malformed: false)
+        let client = try UniFi.Client(
+            gateway: gateway, credentials: PlanningCaptureCredentials(), transport: transport
+        )
+        let snapshot = try await UniFiPlanning.Reader(client: client).capture(site_id: site)
+        let request_count = await transport.requestCount()
+        guard snapshot.policies.count == 345,
+              snapshot.policies.allSatisfy({ $0.report_flow_enabled == nil }),
+              request_count == 16
+        else { throw PlanningCaptureFailure.assertion }
+
+        let malformed = LivePolicyCaptureTransport(malformed: true)
+        let invalidClient = try UniFi.Client(
+            gateway: gateway, credentials: PlanningCaptureCredentials(), transport: malformed
+        )
+        do {
+            _ = try await UniFiPlanning.Reader(client: invalidClient).capture(site_id: site)
+            throw PlanningCaptureFailure.assertion
+        } catch let failure as UniFiPlanning.ReadFailure {
+            guard failure.stage == .policies,
+                  failure.kind == .decoding,
+                  failure.field == "ipVersion",
+                  failure.coding_path.contains("index_0"),
+                  failure.report.diagnostic.identity?.namespace == "unifi.planning",
+                  !failure.description.contains("192.168.66.4"),
+                  !String(describing: failure.report).contains("192.168.66.4")
+            else { throw PlanningCaptureFailure.assertion }
+        }
+    }
+}
+
+private actor LivePolicyCaptureTransport: UniFi.Transport {
+    let malformed: Bool
+    private var count = 0
+    private let zone = "00000000-0000-0000-0000-000000000002"
+
+    init(malformed: Bool) { self.malformed = malformed }
+
+    func send(_ request: URLRequest) async throws -> UniFi.HTTPResult {
+        count += 1
+        guard let url = request.url,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let offset = Int(components.queryItems?.first(where: { $0.name == "offset" })?.value ?? "")
+        else { throw PlanningCaptureFailure.assertion }
+        let data: [[String: Any]]
+        let total: Int
+        switch url.path {
+        case let path where path.hasSuffix("/networks"):
+            total = 0
+            data = []
+        case let path where path.hasSuffix("/firewall/zones"):
+            total = 1
+            data = [["id": zone, "name": "private-zone-192.168.66.4",
+                     "metadata": ["origin": "USER_DEFINED"], "networkIds": []]]
+        case let path where path.hasSuffix("/firewall/policies"):
+            total = 345
+            data = (offset..<min(offset + 25, total)).map { index in
+                let scope: [String: Any] = (malformed && index == 25)
+                    ? [:] : ["ipVersion": "IPV4_AND_IPV6"]
+                return [
+                    "id": String(format: "00000000-0000-0000-0000-%012d", index + 2_000),
+                    "name": "private-name-192.168.66.4", "index": index,
+                    "enabled": true, "loggingEnabled": false,
+                    "metadata": ["origin": "USER_DEFINED"],
+                    "action": ["type": "BLOCK"],
+                    "source": ["zoneId": zone], "destination": ["zoneId": zone],
+                    "ipProtocolScope": scope,
+                ]
+            }
+        default:
+            throw PlanningCaptureFailure.assertion
+        }
+        let body = try JSONSerialization.data(withJSONObject: [
+            "data": data, "count": data.count, "offset": offset,
+            "limit": 25, "totalCount": total,
+        ])
+        return .init(status: 200, body: body)
+    }
+
+    func requestCount() -> Int { count }
+}
+

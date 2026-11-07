@@ -11,6 +11,7 @@ let package = Package(
         .executable(name: "t_unifi", targets: ["UniFiTests"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/leviouwendijk/Errors.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Primitives.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/HTTP.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Milieu.git", branch: "master"),
@@ -23,6 +24,7 @@ let package = Package(
                 .product(name: "Primitives", package: "Primitives"),
                 .product(name: "HTTP", package: "HTTP"),
                 .product(name: "Milieu", package: "Milieu"),
+                .product(name: "Errors", package: "Errors"),
             ],
             path: "Sources/UniFi"
         ),
@@ -32,6 +34,7 @@ let package = Package(
                 "UniFi",
                 .product(name: "Primitives", package: "Primitives"),
                 .product(name: "Difference", package: "Difference"),
+                .product(name: "Errors", package: "Errors"),
             ],
             path: "Sources/UniFiPlanning"
         ),
@@ -42,6 +45,7 @@ let package = Package(
                 "UniFiPlanning",
                 .product(name: "Difference", package: "Difference"),
                 .product(name: "Milieu", package: "Milieu"),
+                .product(name: "Errors", package: "Errors"),
             ],
             path: "Testing/UniFiTests"
         ),

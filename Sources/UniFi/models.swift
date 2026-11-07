@@ -74,7 +74,7 @@ extension UniFi {
             public let index: Int
             public let enabled: Bool
             public let loggingEnabled: Bool
-            public let reportFlowEnabled: Bool
+            public let reportFlowEnabled: Bool?
             public let metadata: Metadata
             public let action: Action
             public let source: Endpoint

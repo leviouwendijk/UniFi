@@ -41,6 +41,23 @@ struct PlanningTests {
         try check(!plan.presentation.changeSummary.contains("10.2.1.0"))
         try plan.require_fresh(snapshot)
         try plan.verify(plan.after)
+        let absentReporting = try decode(
+            UniFi.Firewall.Policy.self,
+            #"{"id":"00000000-0000-0000-0000-000000000006","name":"Deny","index":4,"enabled":true,"loggingEnabled":false,"metadata":{"origin":"USER_DEFINED"},"action":{"type":"BLOCK"},"source":{"zoneId":"00000000-0000-0000-0000-000000000004"},"destination":{"zoneId":"00000000-0000-0000-0000-000000000005"},"ipProtocolScope":{"ipVersion":"IPV4_AND_IPV6"}}"#
+        )
+        let unknownReporting = try UniFiPlanning.Snapshot(
+            site_id: site, networks: [networkA, networkB],
+            zones: [zoneA, zoneB], policies: [absentReporting]
+        )
+        try check(unknownReporting.policies[0].report_flow_enabled == nil)
+        let reportingPlan = try UniFiPlanning.Plan.prepare(
+            from: unknownReporting,
+            changes: [.patch_policy_telemetry(
+                policy_id: policyID, logging_enabled: nil, report_flow_enabled: false
+            )]
+        )
+        try check(reportingPlan.before.policies[0].report_flow_enabled == nil)
+        try check(reportingPlan.after.policies[0].report_flow_enabled == false)
         let restored = try JSONDecoder().decode(
             UniFiPlanning.Plan.self,
             from: JSONEncoder().encode(plan)

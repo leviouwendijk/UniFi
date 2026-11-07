@@ -3,6 +3,7 @@ import Foundation
 import FoundationNetworking
 #endif
 import Milieu
+import Errors
 
 extension UniFi {
     public enum Failure: Error, Sendable, Equatable {
@@ -16,6 +17,102 @@ extension UniFi {
         case encodingFailure
         case invalidMutation
         case mutationNotApproved
+    }
+
+    /// A bounded, model-safe projection of JSON decoding failures.
+    /// Never stores input values, URLs, response bodies or raw debug descriptions.
+    public struct DecodingFailure: SemanticError, Sendable, CustomStringConvertible {
+        public enum Kind: String, Sendable {
+            case missing_key
+            case type_mismatch
+            case value_missing
+            case malformed_json
+            case unknown
+        }
+
+        public let kind: Kind
+        public let coding_path: [String]
+        public let field: String?
+
+        public init(_ error: DecodingError) {
+            let context: DecodingError.Context
+            let field: String?
+            switch error {
+            case .keyNotFound(let key, let value):
+                kind = .missing_key
+                context = value
+                field = Self.safe_key(key.stringValue)
+            case .typeMismatch(_, let value):
+                kind = .type_mismatch
+                context = value
+                field = nil
+            case .valueNotFound(_, let value):
+                kind = .value_missing
+                context = value
+                field = nil
+            case .dataCorrupted(let value):
+                kind = .malformed_json
+                context = value
+                field = nil
+            @unknown default:
+                kind = .unknown
+                context = .init(codingPath: [], debugDescription: "")
+                field = nil
+            }
+            self.field = field
+            coding_path = Array(context.codingPath.prefix(16)).map { key in
+                if let index = key.intValue, (0...10_000).contains(index) {
+                    return "index_\(index)"
+                }
+                return Self.safe_key(key.stringValue)
+            }
+        }
+
+        /// Arbitrary dictionary keys could contain private addresses or names.
+        public static func safe_key(_ raw: String) -> String {
+            let known: Set<String> = [
+                "data", "count", "limit", "offset", "totalCount",
+                "id", "name", "internalReference", "management", "vlanId",
+                "default", "enabled", "metadata", "origin", "zoneId",
+                "networkIds", "description", "index", "loggingEnabled",
+                "reportFlowEnabled", "action", "type", "allowReturnTraffic",
+                "source", "destination", "trafficFilter", "ipProtocolScope",
+                "ipVersion", "connectionStateFilter", "ipsecFilter",
+                "schedule", "mode",
+            ]
+            if known.contains(raw) { return raw }
+            if raw.hasPrefix("index_"),
+               let index = Int(raw.dropFirst(6)),
+               (0...10_000).contains(index) {
+                return "index_\(index)"
+            }
+            return "unrecognized_field"
+        }
+
+        public var description: String {
+            let path = coding_path.joined(separator: ".")
+            let suffix = field.map { " field=\($0)" } ?? ""
+            return "decoding kind=\(kind.rawValue) path=\(path)\(suffix)"
+        }
+
+        public var errorIdentity: ErrorIdentity {
+            .init(namespace: "unifi", code: "decoding_\(kind.rawValue)")
+        }
+
+        public var errorPresentation: ErrorPresentation {
+            .init(message: description)
+        }
+
+        public var errorDiagnosticFields: [ErrorDiagnosticField] {
+            var fields: [ErrorDiagnosticField] = [
+                .init(key: "decoding.kind", value: .string(kind.rawValue)),
+                .init(key: "decoding.codingpath", value: .array(coding_path.map { .string($0) })),
+            ]
+            if let field {
+                fields.append(.init(key: "decoding.field", value: .string(field)))
+            }
+            return fields
+        }
     }
 
     public struct APIKey: Sendable, CustomStringConvertible, CustomDebugStringConvertible {
@@ -188,6 +285,8 @@ extension UniFi {
             }
             do {
                 return try JSONDecoder().decode(T.self, from: result.body)
+            } catch let error as DecodingError {
+                throw DecodingFailure(error)
             } catch {
                 throw Failure.decodingFailure
             }
@@ -212,6 +311,8 @@ extension UniFi {
             }
             do {
                 return try JSONDecoder().decode(Response.self, from: result.body)
+            } catch let error as DecodingError {
+                throw DecodingFailure(error)
             } catch {
                 throw Failure.decodingFailure
             }

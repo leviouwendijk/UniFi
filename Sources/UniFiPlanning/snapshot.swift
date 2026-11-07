@@ -55,7 +55,7 @@ public enum UniFiPlanning {
         public let index: Int
         public let enabled: Bool
         public internal(set) var logging_enabled: Bool
-        public internal(set) var report_flow_enabled: Bool
+        public internal(set) var report_flow_enabled: Bool?
         public let origin: String
         public let action: String
         public let return_traffic: Bool?

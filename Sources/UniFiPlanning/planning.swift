@@ -109,7 +109,7 @@ extension UniFiPlanning {
                         }
                         return .init(
                             label: "Firewall policy",
-                            detail: "\(action); enabled \(policy.enabled); logging \(policy.logging_enabled); reporting \(policy.report_flow_enabled)"
+                            detail: "\(action); enabled \(policy.enabled); logging \(policy.logging_enabled); reporting \(policy.report_flow_enabled.map { String($0) } ?? "unspecified")"
                         )
                     }
                 }
