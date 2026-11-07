@@ -49,6 +49,64 @@ public enum UniFiPlanning {
         }
     }
 
+    public struct PortMatch: Sendable, Codable, Hashable {
+        public let type: String
+        public let value: Int?
+        public let start: Int?
+        public let stop: Int?
+
+        public init(_ value: UniFi.Firewall.Policy.Endpoint.TrafficFilter.PortMatch) {
+            type = value.type
+            self.value = value.value
+            start = value.start
+            stop = value.stop
+        }
+    }
+
+    public struct PortSelection: Sendable, Codable, Hashable {
+        public let type: String
+        public let match_opposite: Bool?
+        public let items: [PortMatch]?
+        public let traffic_matching_list_id: UUID?
+
+        public init(_ value: UniFi.Firewall.Policy.Endpoint.TrafficFilter.PortFilter) {
+            type = value.type
+            match_opposite = value.matchOpposite
+            items = value.items?.map(PortMatch.init)
+            traffic_matching_list_id = value.trafficMatchingListId
+        }
+    }
+
+    public struct TrafficSelection: Sendable, Codable, Hashable {
+        public let type: String
+        public let network_ids: [UUID]?
+        public let network_match_opposite: Bool?
+        public let ports: PortSelection?
+
+        public init(_ value: UniFi.Firewall.Policy.Endpoint.TrafficFilter) {
+            type = value.type
+            network_ids = value.networkFilter?.networkIds
+            network_match_opposite = value.networkFilter?.matchOpposite
+            ports = value.portFilter.map(PortSelection.init)
+        }
+    }
+
+    public struct ProtocolSelection: Sendable, Codable, Hashable {
+        public let type: String
+        public let match_opposite: Bool?
+        public let name: String?
+        public let preset: String?
+        public let number: Int?
+
+        public init(_ value: UniFi.Firewall.Policy.ProtocolScope.ProtocolFilter) {
+            type = value.type
+            match_opposite = value.matchOpposite
+            name = value.`protocol`?.name
+            preset = value.preset?.type
+            number = value.protocolNumber
+        }
+    }
+
     public struct Policy: Sendable, Codable, Hashable {
         public let id: UUID
         public let name: String
@@ -68,6 +126,9 @@ public enum UniFiPlanning {
         public let connection_states: [String]?
         public let ipsec_filter: String?
         public let schedule: String?
+        public let source_selection: TrafficSelection?
+        public let destination_selection: TrafficSelection?
+        public let protocol_selection: ProtocolSelection?
 
         public init(_ value: UniFi.Firewall.Policy) {
             id = value.id
@@ -88,6 +149,9 @@ public enum UniFiPlanning {
             connection_states = value.connectionStateFilter
             ipsec_filter = value.ipsecFilter
             schedule = value.schedule?.mode
+            source_selection = value.source.trafficFilter.map(TrafficSelection.init)
+            destination_selection = value.destination.trafficFilter.map(TrafficSelection.init)
+            protocol_selection = value.ipProtocolScope.protocolFilter.map(ProtocolSelection.init)
         }
     }
 

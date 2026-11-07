@@ -39,6 +39,20 @@ struct PlanningTests {
         try check(plan.presentation.graph?.edges.filter { $0.change != .unchanged }.count == 3)
         try check(plan.presentation.graph?.nodes.filter { $0.change == .modified }.count == 1)
         try check(!plan.presentation.changeSummary.contains("10.2.1.0"))
+        let portPolicy = try decode(UniFi.Firewall.Policy.self,
+            #"{"id":"00000000-0000-0000-0000-000000000006","name":"TCP 443","index":4,"enabled":true,"loggingEnabled":false,"metadata":{"origin":"USER_DEFINED"},"action":{"type":"ALLOW"},"source":{"zoneId":"00000000-0000-0000-0000-000000000004"},"destination":{"zoneId":"00000000-0000-0000-0000-000000000005","trafficFilter":{"type":"PORT","portFilter":{"type":"PORTS","matchOpposite":false,"items":[{"type":"PORT_NUMBER","value":443},{"type":"PORT_NUMBER_RANGE","start":8080,"stop":8090}]}}},"ipProtocolScope":{"ipVersion":"IPV4_AND_IPV6","protocolFilter":{"type":"NAMED_PROTOCOL","matchOpposite":false,"protocol":{"name":"tcp"}}}}"#)
+        let portSnapshot = try UniFiPlanning.Snapshot(
+            site_id: site, networks: [networkA, networkB],
+            zones: [zoneA, zoneB], policies: [portPolicy]
+        )
+        try check(portSnapshot.policies[0].destination_selection?.ports?.items?.first?.value == 443)
+        try check(portSnapshot.policies[0].destination_selection?.ports?.items?.last?.start == 8080)
+        try check(portSnapshot.policies[0].destination_selection?.ports?.items?.last?.stop == 8090)
+        try check(portSnapshot.policies[0].protocol_selection?.name == "tcp")
+        try check(try JSONDecoder().decode(
+            UniFiPlanning.Snapshot.self,
+            from: JSONEncoder().encode(portSnapshot)
+        ) == portSnapshot)
         try plan.require_fresh(snapshot)
         try plan.verify(plan.after)
 

@@ -53,16 +53,54 @@ extension UniFi {
 
             public struct Endpoint: Decodable, Sendable {
                 public struct TrafficFilter: Decodable, Sendable {
+                public struct PortMatch: Decodable, Sendable {
                     public let type: String
+                    public let value: Int?
+                    public let start: Int?
+                    public let stop: Int?
                 }
 
-                public let zoneId: UUID
-                public let trafficFilter: TrafficFilter?
+                public struct PortFilter: Decodable, Sendable {
+                    public let type: String
+                    public let matchOpposite: Bool?
+                    public let items: [PortMatch]?
+                    public let trafficMatchingListId: UUID?
+                }
+
+                public struct NetworkFilter: Decodable, Sendable {
+                    public let networkIds: [UUID]
+                    public let matchOpposite: Bool
+                }
+
+                public let type: String
+                public let portFilter: PortFilter?
+                public let networkFilter: NetworkFilter?
             }
 
-            public struct ProtocolScope: Decodable, Sendable {
-                public let ipVersion: String
+            public let zoneId: UUID
+            public let trafficFilter: TrafficFilter?
+        }
+
+        public struct ProtocolScope: Decodable, Sendable {
+            public struct ProtocolFilter: Decodable, Sendable {
+                public struct NamedProtocol: Decodable, Sendable {
+                    public let name: String
+                }
+
+                public struct Preset: Decodable, Sendable {
+                    public let type: String?
+                }
+
+                public let type: String
+                public let matchOpposite: Bool?
+                public let `protocol`: NamedProtocol?
+                public let preset: Preset?
+                public let protocolNumber: Int?
             }
+
+            public let ipVersion: String
+            public let protocolFilter: ProtocolFilter?
+        }
 
             public struct Schedule: Decodable, Sendable {
                 public let mode: String
