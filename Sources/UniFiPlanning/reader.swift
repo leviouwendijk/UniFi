@@ -24,24 +24,36 @@ extension UniFiPlanning {
             case unexpected
         }
 
+        public enum ValidationIssue: String, Sendable {
+            case duplicate_identity
+            case unknown_network
+            case unknown_zone
+            case overlapping_membership
+            case inconsistent_membership
+            case other
+        }
+
         public let stage: Stage
         public let kind: Kind
         public let http_status: Int?
         public let coding_path: [String]
         public let field: String?
+        public let validation_issue: ValidationIssue?
 
         public init(
             stage: Stage,
             kind: Kind,
             http_status: Int? = nil,
             coding_path: [String] = [],
-            field: String? = nil
+            field: String? = nil,
+            validation_issue: ValidationIssue? = nil
         ) {
             self.stage = stage
             self.kind = kind
             self.http_status = http_status
             self.coding_path = Array(coding_path.prefix(16)).map(UniFi.DecodingFailure.safe_key)
             self.field = field.map(UniFi.DecodingFailure.safe_key)
+            self.validation_issue = validation_issue
         }
 
         public init(stage: Stage, error: any Error) {
@@ -63,8 +75,18 @@ extension UniFiPlanning {
                 switch failure {
                 case .incomplete_page:
                     self.init(stage: stage, kind: .pagination)
+                case .duplicate_identity:
+                    self.init(stage: stage, kind: .validation, validation_issue: .duplicate_identity)
+                case .unknown_network(_):
+                    self.init(stage: stage, kind: .validation, validation_issue: .unknown_network)
+                case .unknown_zone(_):
+                    self.init(stage: stage, kind: .validation, validation_issue: .unknown_zone)
+                case .overlapping_membership(_):
+                    self.init(stage: stage, kind: .validation, validation_issue: .overlapping_membership)
+                case .inconsistent_membership(_):
+                    self.init(stage: stage, kind: .validation, validation_issue: .inconsistent_membership)
                 default:
-                    self.init(stage: stage, kind: .validation)
+                    self.init(stage: stage, kind: .validation, validation_issue: .other)
                 }
             } else {
                 self.init(stage: stage, kind: .unexpected)
@@ -76,6 +98,9 @@ extension UniFiPlanning {
             if let http_status { parts.append("http_status=\(http_status)") }
             if !coding_path.isEmpty { parts.append("path=\(coding_path.joined(separator: "."))") }
             if let field { parts.append("field=\(field)") }
+            if let validation_issue {
+                parts.append("rule=\(validation_issue.rawValue)")
+            }
             return parts.joined(separator: " ")
         }
 
@@ -100,6 +125,12 @@ extension UniFiPlanning {
             }
             if let field {
                 fields.append(.init(key: "field", value: .string(field)))
+            }
+            if let validation_issue {
+                fields.append(.init(
+                    key: "validation_rule",
+                    value: .string(validation_issue.rawValue)
+                ))
             }
             return fields
         }

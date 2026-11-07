@@ -128,11 +128,39 @@ struct PlanningCaptureTests {
             }
         }
         try await verifyLivePolicyShape(gateway: gateway, site: site)
+        try verifyValidationDiagnostics()
         print("PASS UniFiPlanning paginated site discovery, 345-policy capture, safe decoding and page-drift rejection")
     }
 }
 
 private extension PlanningCaptureTests {
+    static func verifyValidationDiagnostics() throws {
+        let identifier = UUID()
+        let cases: [(UniFiPlanning.Failure, UniFiPlanning.ReadFailure.ValidationIssue)] = [
+            (.duplicate_identity, .duplicate_identity),
+            (.unknown_network(identifier), .unknown_network),
+            (.unknown_zone(identifier), .unknown_zone),
+            (.overlapping_membership(identifier), .overlapping_membership),
+            (.inconsistent_membership(identifier), .inconsistent_membership),
+        ]
+        for (source, issue) in cases {
+            let failure = UniFiPlanning.ReadFailure(
+                stage: .validation,
+                error: source
+            )
+            let report = failure.report.redacted(policy: .publicsafe)
+            guard failure.stage == .validation,
+                  failure.kind == .validation,
+                  failure.validation_issue == issue,
+                  failure.description.contains("rule=\(issue.rawValue)"),
+                  !failure.description.contains(identifier.uuidString),
+                  !String(describing: report).contains(identifier.uuidString)
+            else {
+                throw PlanningCaptureFailure.assertion
+            }
+        }
+    }
+
     static func verifyLivePolicyShape(gateway: URL, site: UUID) async throws {
         let transport = LivePolicyCaptureTransport(malformed: false)
         let client = try UniFi.Client(
