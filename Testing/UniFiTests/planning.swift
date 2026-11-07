@@ -41,6 +41,37 @@ struct PlanningTests {
         try check(!plan.presentation.changeSummary.contains("10.2.1.0"))
         try plan.require_fresh(snapshot)
         try plan.verify(plan.after)
+
+        let unresolvedNetwork = try id("00000000-0000-0000-0000-000000000007")
+        let unresolvedZone = try id("00000000-0000-0000-0000-000000000008")
+        let partialZone = try decode(UniFi.Firewall.Zone.self,
+            #"{"id":"00000000-0000-0000-0000-000000000004","name":"Trusted","metadata":{"origin":"USER_DEFINED"},"networkIds":["00000000-0000-0000-0000-000000000002","00000000-0000-0000-0000-000000000007"]}"#)
+        let partialPolicy = try decode(UniFi.Firewall.Policy.self,
+            #"{"id":"00000000-0000-0000-0000-000000000006","name":"Deny","index":4,"enabled":true,"loggingEnabled":false,"metadata":{"origin":"USER_DEFINED"},"action":{"type":"BLOCK"},"source":{"zoneId":"00000000-0000-0000-0000-000000000004"},"destination":{"zoneId":"00000000-0000-0000-0000-000000000008"},"ipProtocolScope":{"ipVersion":"IPV4_AND_IPV6"}}"#)
+        let partial = try UniFiPlanning.Snapshot(
+            site_id: site,
+            networks: [networkA, networkB],
+            zones: [partialZone, zoneB],
+            policies: [partialPolicy]
+        )
+        try check(!partial.reference_complete)
+        try check(partial.unresolved_network_ids == Set([unresolvedNetwork]))
+        try check(partial.unresolved_zone_ids == Set([unresolvedZone]))
+        try check(partial.zones[0].network_ids.contains(unresolvedNetwork))
+        try check(partial.policies[0].destination_zone_id == unresolvedZone)
+        try check(try partial.topology().nodes.count == 6)
+        do {
+            _ = try UniFiPlanning.Plan.prepare(
+                from: partial,
+                changes: [.patch_policy_telemetry(
+                    policy_id: policyID,
+                    logging_enabled: true,
+                    report_flow_enabled: nil
+                )]
+            )
+            throw PlanningTestFailure.assertion
+        } catch UniFiPlanning.Failure.incomplete_snapshot {}
+
         let absentReporting = try decode(
             UniFi.Firewall.Policy.self,
             #"{"id":"00000000-0000-0000-0000-000000000006","name":"Deny","index":4,"enabled":true,"loggingEnabled":false,"metadata":{"origin":"USER_DEFINED"},"action":{"type":"BLOCK"},"source":{"zoneId":"00000000-0000-0000-0000-000000000004"},"destination":{"zoneId":"00000000-0000-0000-0000-000000000005"},"ipProtocolScope":{"ipVersion":"IPV4_AND_IPV6"}}"#

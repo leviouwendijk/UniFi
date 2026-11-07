@@ -16,6 +16,7 @@ public enum UniFiPlanning {
         case stale_snapshot
         case verification_failed
         case incomplete_page
+        case incomplete_snapshot
     }
 
     public struct Network: Sendable, Codable, Hashable {
@@ -93,6 +94,8 @@ public enum UniFiPlanning {
     public enum Node: Sendable, Codable, Hashable {
         case network(Network)
         case zone(Zone)
+        case unresolved_network(UUID)
+        case unresolved_zone(UUID)
     }
 
     public enum Relationship: Sendable, Codable, Hashable {
@@ -105,6 +108,25 @@ public enum UniFiPlanning {
         public let networks: [Network]
         public let zones: [Zone]
         public let policies: [Policy]
+
+        public var unresolved_network_ids: Set<UUID> {
+            Set(zones.flatMap(\.network_ids))
+                .subtracting(networks.map(\.id))
+        }
+
+        public var unresolved_zone_ids: Set<UUID> {
+            let referenced = Set(
+                networks.compactMap(\.zone_id) +
+                policies.flatMap {
+                    [$0.source_zone_id, $0.destination_zone_id]
+                }
+            )
+            return referenced.subtracting(zones.map(\.id))
+        }
+
+        public var reference_complete: Bool {
+            unresolved_network_ids.isEmpty && unresolved_zone_ids.isEmpty
+        }
 
         public init(
             site_id: UUID,
@@ -119,19 +141,11 @@ public enum UniFiPlanning {
                   unique(policies.map(\.id)) else {
                 throw Failure.duplicate_identity
             }
-            let network_ids = Set(networks.map(\.id))
-            let zone_ids = Set(zones.map(\.id))
-            for network in networks {
-                if let id = network.zone_id, !zone_ids.contains(id) {
-                    throw Failure.unknown_zone(id)
-                }
-            }
             var assigned_networks = Set<UUID>()
             var zone_for_network: [UUID: UUID] = [:]
             for zone in zones {
                 guard unique(zone.network_ids) else { throw Failure.duplicate_identity }
                 for id in zone.network_ids {
-                    guard network_ids.contains(id) else { throw Failure.unknown_network(id) }
                     guard assigned_networks.insert(id).inserted else {
                         throw Failure.overlapping_membership(id)
                     }
@@ -143,12 +157,6 @@ public enum UniFiPlanning {
                    let assigned = zone_for_network[network.id],
                    assigned != zone_id {
                     throw Failure.inconsistent_membership(network.id)
-                }
-            }
-            for policy in policies {
-                for id in [policy.source_zone_id, policy.destination_zone_id]
-                    where !zone_ids.contains(id) {
-                    throw Failure.unknown_zone(id)
                 }
             }
             self.site_id = site_id
@@ -192,6 +200,10 @@ public enum UniFiPlanning {
                     .init(id: "network/\(key($0.id))", value: .network($0))
                 } + zones.sorted { key($0.id) < key($1.id) }.map {
                     .init(id: "zone/\(key($0.id))", value: .zone($0))
+                } + unresolved_network_ids.sorted { key($0) < key($1) }.map {
+                    .init(id: "network/\(key($0))", value: .unresolved_network($0))
+                } + unresolved_zone_ids.sorted { key($0) < key($1) }.map {
+                    .init(id: "zone/\(key($0))", value: .unresolved_zone($0))
                 }
             var edges: [Graph<String, Node, String, Relationship>.Edge] = []
             for zone in zones.sorted(by: { key($0.id) < key($1.id) }) {

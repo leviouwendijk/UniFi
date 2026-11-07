@@ -30,6 +30,9 @@ extension UniFiPlanning {
             changes: [Change]
         ) throws -> Self {
             guard !changes.isEmpty else { throw Failure.no_changes }
+            guard snapshot.reference_complete else {
+                throw Failure.incomplete_snapshot
+            }
             var zones = snapshot.zones
             var policies = snapshot.policies
             let known_networks = Set(snapshot.networks.map(\.id))
@@ -95,6 +98,10 @@ extension UniFiPlanning {
                         return .init(label: "Network", detail: "VLAN \(network.vlan_id); enabled \(network.enabled)")
                     case .zone(let zone):
                         return .init(label: "Firewall zone", detail: "\(zone.network_ids.count) network memberships")
+                    case .unresolved_network:
+                        return .init(label: "Unresolved network", detail: "Absent from network inventory")
+                    case .unresolved_zone:
+                        return .init(label: "Unresolved zone", detail: "Absent from firewall zone inventory")
                     }
                 },
                 presentingEdge: { value in
