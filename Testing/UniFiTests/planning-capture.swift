@@ -31,6 +31,16 @@ private actor PlanningCaptureTransport: UniFi.Transport {
         let entries: [[String: Any]]
         let total: Int
         switch url.path {
+        case let path where path.hasSuffix("/sites"):
+            total = drift && offset == 25 ? 27 : 26
+            let indices = offset == 0 ? Array(0..<25) : [25]
+            entries = indices.map { index in
+                [
+                    "id": String(format: "00000000-0000-0000-0000-%012d", index + 1),
+                    "name": "private-site-name-\(index)",
+                    "internalReference": "site-\(index)",
+                ]
+            }
         case let path where path.hasSuffix("/networks"):
             total = drift && offset == 25 ? 27 : 26
             let indices = offset == 0 ? Array(0..<25) : [25]
@@ -75,16 +85,23 @@ struct PlanningCaptureTests {
             credentials: PlanningCaptureCredentials(),
             transport: transport
         )
-        let snapshot = try await UniFiPlanning.Reader(client: client).capture(site_id: site)
+        let reader = UniFiPlanning.Reader(client: client)
+        let sites = try await reader.list_sites()
+        guard sites.count == 26,
+              sites.first?.name == "private-site-name-0",
+              sites.last?.id == UUID(uuidString: "00000000-0000-0000-0000-000000000026")
+        else { throw PlanningCaptureFailure.assertion }
+        let snapshot = try await reader.capture(site_id: site)
         guard snapshot.networks.count == 26,
               snapshot.zones.isEmpty,
               snapshot.policies.isEmpty,
               snapshot.site_id == site
         else { throw PlanningCaptureFailure.assertion }
         let requests = await transport.requests()
-        guard requests.count == 4,
+        guard requests.count == 6,
               requests.allSatisfy({ $0.httpMethod == "GET" }),
-              requests[1].url?.query?.contains("offset=25") == true
+              requests[1].url?.query?.contains("offset=25") == true,
+              requests[3].url?.query?.contains("offset=25") == true
         else { throw PlanningCaptureFailure.assertion }
 
         let driftTransport = PlanningCaptureTransport(drift: true)
@@ -94,9 +111,13 @@ struct PlanningCaptureTests {
             transport: driftTransport
         )
         do {
+            _ = try await UniFiPlanning.Reader(client: driftClient).list_sites()
+            throw PlanningCaptureFailure.assertion
+        } catch UniFiPlanning.Failure.incomplete_page {}
+        do {
             _ = try await UniFiPlanning.Reader(client: driftClient).capture(site_id: site)
             throw PlanningCaptureFailure.assertion
         } catch UniFiPlanning.Failure.incomplete_page {}
-        print("PASS UniFiPlanning paginated snapshot capture and page-drift rejection")
+        print("PASS UniFiPlanning paginated site discovery, snapshot capture and drift rejection")
     }
 }

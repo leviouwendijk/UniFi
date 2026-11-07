@@ -9,6 +9,12 @@ extension UniFiPlanning {
             self.client = client
         }
 
+        public func list_sites() async throws -> [UniFi.Site.Overview] {
+            try await collect { page in
+                try await client.network.sites.list(page: page)
+            }
+        }
+
         public func capture(site_id: UUID) async throws -> Snapshot {
             let site = client.network.site(site_id)
             let networks = try await collect { query in
