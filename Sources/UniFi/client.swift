@@ -79,6 +79,9 @@ extension UniFi {
                 "source", "destination", "trafficFilter", "ipProtocolScope",
                 "ipVersion", "connectionStateFilter", "ipsecFilter",
                 "schedule", "mode",
+                "ipAddress", "macAddress", "connectedAt", "uplinkDeviceId",
+                "model", "state",
+                "ipAddressFilter", "macAddressFilter", "macAddresses", "items", "value",
             ]
             if known.contains(raw) { return raw }
             if raw.hasPrefix("index_"),
@@ -355,6 +358,24 @@ extension UniFi {
 
         public var sites: SitesAPI { SitesAPI(backend: backend) }
         public func site(_ id: UUID) -> SiteAPI { SiteAPI(backend: backend, id: id) }
+
+        /// Read-only GET of an integration API path (relative to `/proxy/network/integration/v1`), returning the raw body.
+        /// For exploring endpoints that have no typed model yet.
+        public func raw(_ path: String, page: PageQuery? = nil) async throws -> Data {
+            guard
+                path.hasPrefix("/"),
+                !path.contains(".."),
+                !path.contains("?"),
+                !path.contains("#")
+            else {
+                throw Failure.invalidGateway
+            }
+            let result = try await backend.execute(.get, path: path, page: page)
+            guard (200..<300).contains(result.status) else {
+                throw Failure.httpStatus(result.status)
+            }
+            return result.body
+        }
     }
 
     public struct SitesAPI: Sendable {
@@ -371,6 +392,28 @@ extension UniFi {
 
         public var networks: NetworksAPI { NetworksAPI(backend: backend, siteID: id) }
         public var firewall: FirewallAPI { FirewallAPI(backend: backend, siteID: id) }
+        public var clients: ClientsAPI { ClientsAPI(backend: backend, siteID: id) }
+        public var devices: DevicesAPI { DevicesAPI(backend: backend, siteID: id) }
+    }
+
+    public struct ClientsAPI: Sendable {
+        fileprivate let backend: Backend
+        public let siteID: UUID
+        private var base: String { "/sites/\(siteID.uuidString.lowercased())/clients" }
+
+        public func list(page: PageQuery = .init()) async throws -> Page<Station.Overview> {
+            try await backend.get(base, page: page)
+        }
+    }
+
+    public struct DevicesAPI: Sendable {
+        fileprivate let backend: Backend
+        public let siteID: UUID
+        private var base: String { "/sites/\(siteID.uuidString.lowercased())/devices" }
+
+        public func list(page: PageQuery = .init()) async throws -> Page<Device.Overview> {
+            try await backend.get(base, page: page)
+        }
     }
 
     public struct NetworksAPI: Sendable {

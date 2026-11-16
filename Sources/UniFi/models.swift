@@ -37,6 +37,31 @@ extension UniFi {
         }
     }
 
+    /// A connected client (UniFi calls these stations). Fields vary by client type, so all but `id` are optional.
+    public enum Station {
+        public struct Overview: Decodable, Sendable {
+            public let id: UUID
+            public let name: String?
+            public let type: String?
+            public let ipAddress: String?
+            public let macAddress: String?
+            public let connectedAt: String?
+            public let uplinkDeviceId: UUID?
+        }
+    }
+
+    /// An adopted UniFi device (gateway, switch, access point).
+    public enum Device {
+        public struct Overview: Decodable, Sendable {
+            public let id: UUID
+            public let name: String?
+            public let model: String?
+            public let macAddress: String?
+            public let ipAddress: String?
+            public let state: String?
+        }
+    }
+
     public enum Firewall {
         public struct Zone: Decodable, Sendable {
             public let id: UUID
@@ -72,9 +97,26 @@ extension UniFi {
                     public let matchOpposite: Bool
                 }
 
+                public struct AddressMatch: Decodable, Sendable {
+                    public let type: String
+                    public let value: String?
+                }
+
+                public struct IPAddressFilter: Decodable, Sendable {
+                    public let type: String?
+                    public let matchOpposite: Bool?
+                    public let items: [AddressMatch]?
+                }
+
+                public struct MACAddressFilter: Decodable, Sendable {
+                    public let macAddresses: [String]?
+                }
+
                 public let type: String
                 public let portFilter: PortFilter?
                 public let networkFilter: NetworkFilter?
+                public let ipAddressFilter: IPAddressFilter?
+                public let macAddressFilter: MACAddressFilter?
             }
 
             public let zoneId: UUID

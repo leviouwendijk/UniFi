@@ -9,6 +9,7 @@ let package = Package(
         .library(name: "UniFi", targets: ["UniFi"]),
         .library(name: "UniFiPlanning", targets: ["UniFiPlanning"]),
         .executable(name: "t_unifi", targets: ["UniFiTests"]),
+        .executable(name: "unifi", targets: ["UniFiCLI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/leviouwendijk/Errors.git", branch: "master"),
@@ -16,6 +17,8 @@ let package = Package(
         .package(url: "https://github.com/leviouwendijk/HTTP.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Milieu.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Difference.git", branch: "master"),
+        .package(url: "https://github.com/leviouwendijk/Arguments.git", branch: "master"),
+        .package(url: "https://github.com/leviouwendijk/Loggers.git", branch: "master"),
     ],
     targets: [
         .target(
@@ -48,6 +51,17 @@ let package = Package(
                 .product(name: "Errors", package: "Errors"),
             ],
             path: "Testing/UniFiTests"
+        ),
+        .executableTarget(
+            name: "UniFiCLI",
+            dependencies: [
+                "UniFi",
+                "UniFiPlanning",
+                .product(name: "Arguments", package: "Arguments"),
+                .product(name: "LogCollection", package: "Loggers"),
+                .product(name: "Milieu", package: "Milieu"),
+            ],
+            path: "Sources/UniFiCLI"
         ),
     ],
     swiftLanguageModes: [.v6]

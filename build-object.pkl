@@ -1,0 +1,20 @@
+uuid = "CB7EF9FA-5204-467C-ACED-56269DD5BAB1"
+name = "UniFi"
+types { "library" }
+versions {
+    release {
+        major = 0
+        minor = 1
+        patch = 0
+    }
+}
+compile {
+    use = true
+    arguments { "--products" "unifi" }
+}
+tests {
+    primary = "t_unifi"
+}
+details = ""
+author = "levi"
+update = "https://raw.githubusercontent.com/leviouwendijk/UniFi/master/build-object.pkl"
