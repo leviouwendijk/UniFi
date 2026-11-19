@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/leviouwendijk/Difference.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Arguments.git", branch: "master"),
         .package(url: "https://github.com/leviouwendijk/Loggers.git", branch: "master"),
+        .package(url: "https://github.com/leviouwendijk/Sensitivity.git", branch: "master"),
     ],
     targets: [
         .target(
@@ -28,6 +29,7 @@ let package = Package(
                 .product(name: "HTTP", package: "HTTP"),
                 .product(name: "Milieu", package: "Milieu"),
                 .product(name: "Errors", package: "Errors"),
+                .product(name: "Sensitivity", package: "Sensitivity"),
             ],
             path: "Sources/UniFi"
         ),

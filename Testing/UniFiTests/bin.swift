@@ -104,6 +104,8 @@ struct UniFiTests {
         } catch UniFi.Failure.invalidCredential {}
         let secret = try UniFi.APIKey(key)
         try check(!String(reflecting: secret).contains(key))
+        try check("\(secret)" == "<redacted UniFi API key>")
+        try check(Mirror(reflecting: secret).children.isEmpty)
 
         try await MutationTests.run()
         try PlanningTests.run()

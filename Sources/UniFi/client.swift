@@ -4,6 +4,7 @@ import FoundationNetworking
 #endif
 import Milieu
 import Errors
+import Sensitivity
 
 extension UniFi {
     public enum Failure: Error, Sendable, Equatable {
@@ -118,7 +119,9 @@ extension UniFi {
         }
     }
 
-    public struct APIKey: Sendable, CustomStringConvertible, CustomDebugStringConvertible {
+    public struct APIKey: Sendable, Sensitivity.Redacted {
+        public static let redactedLabel = "UniFi API key"
+
         fileprivate let value: String
 
         public init(_ value: String) throws {
@@ -128,8 +131,6 @@ extension UniFi {
             self.value = value
         }
 
-        public var description: String { "<redacted UniFi API key>" }
-        public var debugDescription: String { description }
     }
 
     public struct HTTPResult: Sendable {
