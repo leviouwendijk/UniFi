@@ -110,7 +110,7 @@ extension UniFi {
         public var errorDiagnosticFields: [ErrorDiagnosticField] {
             var fields: [ErrorDiagnosticField] = [
                 .init(key: "decoding.kind", value: .string(kind.rawValue)),
-                .init(key: "decoding.codingpath", value: .array(coding_path.map { .string($0) })),
+                .init(key: "decoding.coding_path", value: .array(coding_path.map { .string($0) })),
             ]
             if let field {
                 fields.append(.init(key: "decoding.field", value: .string(field)))

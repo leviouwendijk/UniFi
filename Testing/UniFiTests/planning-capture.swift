@@ -148,7 +148,7 @@ private extension PlanningCaptureTests {
                 stage: .validation,
                 error: source
             )
-            let report = failure.report.redacted(policy: .publicsafe)
+            let report = failure.report.redacted(policy: .public_safe)
             guard failure.stage == .validation,
                   failure.kind == .validation,
                   failure.validation_issue == issue,
