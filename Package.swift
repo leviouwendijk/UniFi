@@ -8,7 +8,6 @@ let package = Package(
     products: [
         .library(name: "UniFi", targets: ["UniFi"]),
         .library(name: "UniFiPlanning", targets: ["UniFiPlanning"]),
-        .executable(name: "t_unifi", targets: ["UniFiTests"]),
         .executable(name: "unifi", targets: ["UniFiCLI"]),
     ],
     dependencies: [
@@ -42,17 +41,6 @@ let package = Package(
                 .product(name: "Errors", package: "Errors"),
             ],
             path: "Sources/UniFiPlanning"
-        ),
-        .executableTarget(
-            name: "UniFiTests",
-            dependencies: [
-                "UniFi",
-                "UniFiPlanning",
-                .product(name: "Difference", package: "Difference"),
-                .product(name: "Milieu", package: "Milieu"),
-                .product(name: "Errors", package: "Errors"),
-            ],
-            path: "Testing/UniFiTests"
         ),
         .executableTarget(
             name: "UniFiCLI",
