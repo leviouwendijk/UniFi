@@ -1,0 +1,3 @@
+import Executable;
+
+let tests: Tests = .{ .primary = "t_unifi" };

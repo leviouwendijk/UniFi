@@ -16,6 +16,3 @@ xcuserdata/
 .env
 .env.*
 .env/*
-compiled.pkl
-/compiled.pkl
-**/compiled.pkl
